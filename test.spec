@@ -1,0 +1,61 @@
+# -*- mode: python -*-
+
+block_cipher = None
+
+added_files = [
+         ( 'NHL_Logos/Anaheim_Ducks.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Boston_Bruins.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Buffalo_Sabres.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Calgary_Flames.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Carolina_Hurricanes.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Chicago_Blackhawks.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Colorado_Avalanche.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Columbus_Blue_Jackets.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Dallas_Stars.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Detroit_Red_Wings.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Edmonton_Oilers.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Florida_Panthers.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Los_Angeles_Kings.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Minnesota_Wild.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Montreal_Canadiens.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Nashville_Predators.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/New_Jersey_Devils.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/New_York_Islanders.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/New_York_Rangers.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Ottawa_Senators.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Philadelphia_Flyers.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Phoenix_Coyotes.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Pittsburgh_Penguins.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/San_Jose_Sharks.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/St_Louis_Blues.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Tampa_Bay_Lightning.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Toronto_Maple_Leafs.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Vancouver_Canucks.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Washington_Capitals.gif', 'NHL_Logos'),
+         ( 'NHL_Logos/Winnipeg_Jets.gif', 'NHL_Logos'),
+         ( 'Icon.ico', 'App_Icons')
+         ]
+
+a = Analysis(['test.py'],
+             pathex=['C:\\Users\\Muhamed\\Desktop\\Top Level'],
+             binaries=None,
+             datas=added_files,
+             hiddenimports=[],
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data,
+             cipher=block_cipher)
+exe = EXE(pyz,
+          a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
+          name='test',
+          debug=False,
+          strip=False,
+          upx=True,
+          console=True , icon='Icon.ico')
