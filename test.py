@@ -7,13 +7,11 @@ Also in the spirit of being dynamic, you need to separate more. Make smaller, mo
 '''
 
 import tkinter as tk
-from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 
 import os
 import sys
-
 import datetime
 import json
 import time
@@ -61,7 +59,7 @@ TEAMS = [
     ("Winnipeg", "Jets", "Winnipeg_Jets.gif"),
 ]
 
-COLUMNS = 5
+COLUMNS = 7
 
 class GameTime(tk.Frame):
     def __init__(self, master=None, **kwargs):
@@ -93,7 +91,7 @@ class TeamGrid(tk.Frame):
                 text="{} {}".format(city, name),
                 compound="top",
                 command=partial(master.Team_Name.set, name))
-            btn.img = PhotoImage(file=os.path.join(sys._MEIPASS, "NHL_Logos", image))
+            btn.img = tk.PhotoImage(file=os.path.join(sys._MEIPASS, "NHL_Logos", image))
             btn.config(image=btn.img)
             row, col = divmod(idx, COLUMNS)
             btn.grid(row=row, column=col)
@@ -102,7 +100,7 @@ class StartPage(tk.Frame):
     def __init__(self, master=None, **kwargs):
         tk.Frame.__init__(self, master, **kwargs)
 
-        self.Team_Name = StringVar()
+        self.Team_Name = tk.StringVar()
         self.Team_Name.set('Unassigned')
 
         teams = TeamGrid(self)
@@ -207,7 +205,7 @@ class PageOne(tk.Frame):
     def __init__(self, master=None, **kwargs):
         tk.Frame.__init__(self, master, **kwargs)
 
-        self.Game_ID = StringVar(self)
+        self.Game_ID = tk.StringVar(self)
         self.Game_ID.set('Unassigned')
 
         button1 = tk.Button(self, text="Back to Home",command=lambda: master.show_frame(StartPage))
@@ -262,7 +260,7 @@ def get_data():
     return data
 
 #~ def get_data():
-    #~ '''debug'''
+    #~ '''uncomment this to debug'''
     #~ with open('nhl_data.json') as f:
         #~ return json.load(f)
 
