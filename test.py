@@ -62,19 +62,18 @@ TEAMS = [
 
 COLUMNS = 5
 
-class GameTime(tk.Tk):
-    def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
+class GameTime(tk.Frame):
+    def __init__(self, master=None, **kwargs):
+        tk.Frame.__init__(self, master, **kwargs)
+        master.title('GameTime')
 
-        container = tk.Frame(self)
-        container.pack(side="top", fill="both",expand=True)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         self.frames={}
 
         for F in (StartPage, PageOne):
-            frame = F(container,self)
+            frame = F(self)
             self.frames[F] = frame
             frame.grid(row=0,column=0, sticky="nsew")
 
@@ -100,8 +99,8 @@ class TeamGrid(tk.Frame):
             btn.grid(row=row, column=col)
 
 class StartPage(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self,parent)
+    def __init__(self, master=None, **kwargs):
+        tk.Frame.__init__(self, master, **kwargs)
 
         self.Team_Name = StringVar()
         self.Team_Name.set('Unassigned')
@@ -121,7 +120,7 @@ class StartPage(tk.Frame):
         lbl_Team_Def = tk.Label(self, textvariable=self.Team_Name, anchor="w")
         lbl_Team_Def.grid(row=9,column=2)
 
-        button = tk.Button(self, text="Visit Page 1",command=lambda: is_team_set(Team_Name))
+        button = tk.Button(self, text="Visit Page 1",command=lambda: self.is_team_set(Team_Name))
         button.grid(row=10,column=5)
 
 
@@ -134,19 +133,19 @@ class StartPage(tk.Frame):
         if Team_Name.get() == 'Unassigned':
             messagebox.showwarning("Error!", "You must select your favorite team!")
         else:
-            controller.show_frame(PageOne)
+            self.master.show_frame(PageOne)
 
 
 class PageOne(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self,parent)
+    def __init__(self, master=None, **kwargs):
+        tk.Frame.__init__(self, master, **kwargs)
 
-        Team_Name = controller.frames[StartPage].Team_Name
-        Game_ID = controller.frames[StartPage].Game_ID
+        Team_Name = master.frames[StartPage].Team_Name
+        Game_ID = master.frames[StartPage].Game_ID
 
         label = tk.Label(self,text="Page One")
 
-        button1 = tk.Button(self, text="Back to Home",command=lambda: controller.show_frame(StartPage))
+        button1 = tk.Button(self, text="Back to Home",command=lambda: master.show_frame(StartPage))
         button1.grid(row=2,column=1)
 
         notebook = ttk.Notebook(self)
@@ -291,14 +290,15 @@ class PageOne(tk.Frame):
             #End while true
 
 def main():
-    app = GameTime()
-    app.title('GameTime')
+    root = tk.Tk()
+    app = GameTime(root)
+    app.pack()
     try:
-        app.wm_iconbitmap('Icon.ico')
+        root.wm_iconbitmap('Icon.ico')
     except tk.TclError:
         print("icon load failed") # fails in some conditions
-    app.resizable(0,0)
-    app.mainloop()
+    root.resizable(0,0)
+    root.mainloop()
 
 if __name__ == "__main__":
     main()
