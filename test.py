@@ -80,7 +80,6 @@ class GameTime(tk.Frame):
         self.show_frame(StartPage)
 
     def show_frame(self, cont):
-
         frame = self.frames[cont]
         frame.tkraise()
 
@@ -92,7 +91,7 @@ class TeamGrid(tk.Frame):
             btn = tk.Button(self,
                 text="{} {}".format(city, name),
                 compound="top",
-                command=partial(master.set_label_to_team, name))
+                command=partial(master.Team_Name.set, name))
             btn.img = PhotoImage(file=os.path.join(sys._MEIPASS, "NHL_Logos", image))
             btn.config(image=btn.img)
             row, col = divmod(idx, COLUMNS)
@@ -109,32 +108,23 @@ class StartPage(tk.Frame):
         self.Game_ID.set('Unassigned')
 
         teams = TeamGrid(self)
-        teams.grid()
+        teams.pack()
 
-        label = tk.Label(self,text="Start Page")
-        label.grid(row=8,column=4)
+        lbl_frame = tk.Frame(self) # put these 2 labels in their own frame that can be packed
+        lbl_frame.pack()
+        lbl_selected_team = tk.Label(lbl_frame, text="Selected Team: ")
+        lbl_selected_team.pack(side=tk.LEFT)
+        lbl_Team_Def = tk.Label(lbl_frame, textvariable=self.Team_Name)
+        lbl_Team_Def.pack()
 
-        lbl_selected_team = tk.Label(self, text="Selected Team: ", anchor="e")
-        lbl_selected_team.grid(row=9,column=1)
+        button = tk.Button(self, text="Visit Page 1",command=self.is_team_set)
+        button.pack()
 
-        lbl_Team_Def = tk.Label(self, textvariable=self.Team_Name, anchor="w")
-        lbl_Team_Def.grid(row=9,column=2)
-
-        button = tk.Button(self, text="Visit Page 1",command=lambda: self.is_team_set(Team_Name))
-        button.grid(row=10,column=5)
-
-
-    def set_label_to_team(some_team_name):
-        global Team_Name
-        Team_Name.set(some_team_name)
-        lbl_Team_Def.config(text=Team_Name, anchor="w")
-
-    def is_team_set(Team_Name):
-        if Team_Name.get() == 'Unassigned':
+    def is_team_set(self):
+        if self.Team_Name.get() == 'Unassigned':
             messagebox.showwarning("Error!", "You must select your favorite team!")
         else:
             self.master.show_frame(PageOne)
-
 
 class PageOne(tk.Frame):
     def __init__(self, master=None, **kwargs):
