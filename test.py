@@ -18,49 +18,26 @@ import platform
 import time
 import requests
 import socket
-from colorama import init, Fore, Style
 from functools import partial
 
+#allows this to run in pure python, without freezeing.
 try:
     sys._MEIPASS
 except AttributeError:
     sys._MEIPASS = ''
 
-class GameTime(tk.Tk):
-    def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
-
-        container = tk.Frame(self)
-        container.pack(side="top", fill="both",expand=True)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-
-        self.frames={}
-
-        for F in (StartPage, PageOne):
-            frame = F(container,self)
-            self.frames[F] = frame
-            frame.grid(row=0,column=0, sticky="nsew")
-
-        self.show_frame(StartPage)
-
-    def show_frame(self, cont):
-
-        frame = self.frames[cont]
-        frame.tkraise()
-
 # teams in the order that they should be listed as 3-tuples: (city, name, image)
 TEAMS = [
-    ("Anaheim", "Ducks", "Anaheim_Ducks.gif"),
-    ("Boston", " Bruins", "Boston_Bruins.gif"),
-    ("Buffalo", " Sabres", "Buffalo_Sabres.gif"),
-    ("Calgary", " Flames", "Calgary_Flames.gif"),
-    ("Carolina", " Hurricanes", "Carolina_Hurricanes.gif"),
-    ("Chicago", " Blackhawks", "Chicago_Blackhawks.gif"),
-    ("Colorado", " Avalanche", "Colorado_Avalanche.gif"),
-    ("Columbus", " Blue Jackets", "Columbus_Blue_Jackets.gif"),
-    ("Dallas", " Stars", "Dallas_Stars.gif"),
-    ("Detroit", " Red Wings", "Detroit_Red_Wings.gif"),
+    #~ ("Anaheim", "Ducks", "Anaheim_Ducks.gif"),
+    #~ ("Boston", " Bruins", "Boston_Bruins.gif"),
+    #~ ("Buffalo", " Sabres", "Buffalo_Sabres.gif"),
+    #~ ("Calgary", " Flames", "Calgary_Flames.gif"),
+    #~ ("Carolina", " Hurricanes", "Carolina_Hurricanes.gif"),
+    #~ ("Chicago", " Blackhawks", "Chicago_Blackhawks.gif"),
+    #~ ("Colorado", " Avalanche", "Colorado_Avalanche.gif"),
+    #~ ("Columbus", " Blue Jackets", "Columbus_Blue_Jackets.gif"),
+    #~ ("Dallas", " Stars", "Dallas_Stars.gif"),
+    #~ ("Detroit", " Red Wings", "Detroit_Red_Wings.gif"),
     ("Edmonton", " Oilers", "Edmonton_Oilers.gif"),
     ("Florida", " Panthers", "Florida_Panthers.gif"),
     ("Los Angeles", " Kings", "Los_Angeles_Kings.gif"),
@@ -85,26 +62,55 @@ TEAMS = [
 
 COLUMNS = 5
 
-class StartPage(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self,parent)
+class GameTime(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
 
-        global Team_Name
-        Team_Name = StringVar()
-        Team_Name.set('Unassigned')
-        global Game_ID
-        Game_ID = StringVar()
-        Game_ID.set('Unassigned')
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both",expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames={}
+
+        for F in (StartPage, PageOne):
+            frame = F(container,self)
+            self.frames[F] = frame
+            frame.grid(row=0,column=0, sticky="nsew")
+
+        self.show_frame(StartPage)
+
+    def show_frame(self, cont):
+
+        frame = self.frames[cont]
+        frame.tkraise()
+
+class TeamGrid(tk.Frame):
+    def __init__(self, master=None, **kwargs):
+        tk.Frame.__init__(self, master, **kwargs)
 
         for idx, (city, name, image) in enumerate(TEAMS):
             btn = tk.Button(self,
                 text="{} {}".format(city, name),
                 compound="top",
-                command=partial(self.set_label_to_team, name))
+                command=partial(master.set_label_to_team, name))
             btn.img = PhotoImage(file=os.path.join(sys._MEIPASS, "NHL_Logos", image))
             btn.config(image=btn.img)
             row, col = divmod(idx, COLUMNS)
             btn.grid(row=row, column=col)
+
+class StartPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self,parent)
+
+        self.Team_Name = StringVar()
+        self.Team_Name.set('Unassigned')
+
+        self.Game_ID = StringVar()
+        self.Game_ID.set('Unassigned')
+
+        teams = TeamGrid(self)
+        teams.grid()
 
         label = tk.Label(self,text="Start Page")
         label.grid(row=8,column=4)
@@ -112,7 +118,7 @@ class StartPage(tk.Frame):
         lbl_selected_team = tk.Label(self, text="Selected Team: ", anchor="e")
         lbl_selected_team.grid(row=9,column=1)
 
-        lbl_Team_Def = tk.Label(self, textvariable=Team_Name, anchor="w")
+        lbl_Team_Def = tk.Label(self, textvariable=self.Team_Name, anchor="w")
         lbl_Team_Def.grid(row=9,column=2)
 
         button = tk.Button(self, text="Visit Page 1",command=lambda: is_team_set(Team_Name))
@@ -128,16 +134,15 @@ class StartPage(tk.Frame):
         if Team_Name.get() == 'Unassigned':
             messagebox.showwarning("Error!", "You must select your favorite team!")
         else:
-                controller.show_frame(PageOne)
+            controller.show_frame(PageOne)
 
 
 class PageOne(tk.Frame):
-
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
 
-        global Team_Name
-        global Game_ID
+        Team_Name = controller.frames[StartPage].Team_Name
+        Game_ID = controller.frames[StartPage].Game_ID
 
         label = tk.Label(self,text="Page One")
 
