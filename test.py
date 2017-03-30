@@ -1,6 +1,8 @@
 '''
 The first thing is that you need to remember that repetitive tasks are the computer's job. If you find yourself copy / pasteing code you need to make a routine to do that for you. That way you get dynamic, easily updated code (which is pretty much the mantra of python).
 
+Note how in this new code you can eaisly remove, add or reorganize teams. Or adjut how many columns to use. That would have taken a huge amount of work in the old code.
+
 Also in the spirit of being dynamic, you need to separate more. Make smaller, more specialized classes and functions. Things that have no GUI interactions don't need to be in a GUI class.
 '''
 
@@ -14,7 +16,6 @@ import sys
 
 import datetime
 import json
-import platform
 import time
 import requests
 import socket
@@ -28,26 +29,26 @@ except AttributeError:
 
 # teams in the order that they should be listed as 3-tuples: (city, name, image)
 TEAMS = [
-    #~ ("Anaheim", "Ducks", "Anaheim_Ducks.gif"),
-    #~ ("Boston", "Bruins", "Boston_Bruins.gif"),
-    #~ ("Buffalo", "Sabres", "Buffalo_Sabres.gif"),
-    #~ ("Calgary", "Flames", "Calgary_Flames.gif"),
-    #~ ("Carolina", "Hurricanes", "Carolina_Hurricanes.gif"),
-    #~ ("Chicago", "Blackhawks", "Chicago_Blackhawks.gif"),
-    #~ ("Colorado", "Avalanche", "Colorado_Avalanche.gif"),
-    #~ ("Columbus", "Blue Jackets", "Columbus_Blue_Jackets.gif"),
+    ("Anaheim", "Ducks", "Anaheim_Ducks.gif"),
+    ("Boston", "Bruins", "Boston_Bruins.gif"),
+    ("Buffalo", "Sabres", "Buffalo_Sabres.gif"),
+    ("Calgary", "Flames", "Calgary_Flames.gif"),
+    ("Carolina", "Hurricanes", "Carolina_Hurricanes.gif"),
+    ("Chicago", "Blackhawks", "Chicago_Blackhawks.gif"),
+    ("Colorado", "Avalanche", "Colorado_Avalanche.gif"),
+    ("Columbus", "Blue Jackets", "Columbus_Blue_Jackets.gif"),
     ("Dallas", "Stars", "Dallas_Stars.gif"),
-    #~ ("Detroit", "Red Wings", "Detroit_Red_Wings.gif"),
-    #~ ("Edmonton", "Oilers", "Edmonton_Oilers.gif"),
-    #~ ("Florida", "Panthers", "Florida_Panthers.gif"),
-    #~ ("Los Angeles", "Kings", "Los_Angeles_Kings.gif"),
-    #~ ("Minnesota", "Wild", "Minnesota_Wild.gif"),
-    #~ ("Montreal", "Canadiens", "Montreal_Canadiens.gif"),
-    #~ ("Nashville", "Predators", "Nashville_Predators.gif"),
-    #~ ("New Jersey", "Devils", "New_Jersey_Devils.gif"),
-    #~ ("New York", "Islanders", "New_York_Islanders.gif"),
-    #~ ("New York", "Rangers", "New_York_Rangers.gif"),
-    #~ ("Ottawa", "Senators", "Ottawa_Senators.gif"),
+    ("Detroit", "Red Wings", "Detroit_Red_Wings.gif"),
+    ("Edmonton", "Oilers", "Edmonton_Oilers.gif"),
+    ("Florida", "Panthers", "Florida_Panthers.gif"),
+    ("Los Angeles", "Kings", "Los_Angeles_Kings.gif"),
+    ("Minnesota", "Wild", "Minnesota_Wild.gif"),
+    ("Montreal", "Canadiens", "Montreal_Canadiens.gif"),
+    ("Nashville", "Predators", "Nashville_Predators.gif"),
+    ("New Jersey", "Devils", "New_Jersey_Devils.gif"),
+    ("New York", "Islanders", "New_York_Islanders.gif"),
+    ("New York", "Rangers", "New_York_Rangers.gif"),
+    ("Ottawa", "Senators", "Ottawa_Senators.gif"),
     ("Philadelphia", "Flyers", "Philadelphia_Flyers.gif"),
     ("Phoenix", "Coyotes", "Phoenix_Coyotes.gif"),
     ("Pittsburgh", "Penguins", "Pittsburgh_Penguins.gif"),
@@ -123,10 +124,8 @@ class StartPage(tk.Frame):
         else:
             self.master.show_frame(PageOne)
 
-
 class Schedule(ttk.Frame):
     def __init__(self, master=None, highlight='', **kwargs):
-        print repr(highlight)
         ttk.Frame.__init__(self, master, **kwargs)
 
         self.error_lbl = tk.Label(self, fg="red")
@@ -168,20 +167,20 @@ class Schedule(ttk.Frame):
 
         #Populate data in the treeview
         for game_info in data['games']:
-            # Assign more meaningful names
+            # Assign more meaningful names - why is there so many unused variables here?
             game_clock = game_info['ts']
-            game_stage = game_info['tsc']
+            #~ game_stage = game_info['tsc']
             status = game_info['bs']
 
-            away_team_locale = game_info['atn']
+            #~ away_team_locale = game_info['atn']
             away_team_name = game_info['atv'].title()
             away_team_score = game_info['ats']
-            away_team_result = game_info['atc']
+            #~ away_team_result = game_info['atc']
 
-            home_team_locale = game_info['htn']
+            #~ home_team_locale = game_info['htn']
             home_team_name = game_info['htv'].title()
             home_team_score = game_info['hts']
-            home_team_result = game_info['htc']
+            #~ home_team_result = game_info['htc']
 
             row = away_team_name, away_team_score, home_team_name, home_team_score, game_clock, status
 
@@ -190,7 +189,6 @@ class Schedule(ttk.Frame):
                 tags = 'fav'
                 self.master.master.Game_ID.set(game_info['id'])
             self.tree.insert('', 'end',values = row, tags=tags)
-
 
 class LiveGame(tk.Frame):
     def __init__(self, master=None, **kwargs):
@@ -204,7 +202,6 @@ class LiveGame(tk.Frame):
 
         lbl_game_id = tk.Label(self, textvariable=master.master.Game_ID)
         lbl_game_id.grid(row=1,column=6)
-
 
 class PageOne(tk.Frame):
     def __init__(self, master=None, **kwargs):
@@ -264,10 +261,10 @@ def get_data():
 
     return data
 
-def get_data():
-    '''debug'''
-    with open('nhl_data.json') as f:
-        return json.load(f)
+#~ def get_data():
+    #~ '''debug'''
+    #~ with open('nhl_data.json') as f:
+        #~ return json.load(f)
 
 def main():
     root = tk.Tk()
