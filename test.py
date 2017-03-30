@@ -192,6 +192,20 @@ class Schedule(ttk.Frame):
             self.tree.insert('', 'end',values = row, tags=tags)
 
 
+class LiveGame(tk.Frame):
+    def __init__(self, master=None, **kwargs):
+        tk.Frame.__init__(self, master, **kwargs)
+
+        lbl_home = tk.Label(self, text="AWAY")
+        lbl_home.grid(row=1,column=2)
+
+        lbl_away = tk.Label(self, text="HOME")
+        lbl_away.grid(row=1,column=4)
+
+        lbl_game_id = tk.Label(self, textvariable=master.master.Game_ID)
+        lbl_game_id.grid(row=1,column=6)
+
+
 class PageOne(tk.Frame):
     def __init__(self, master=None, **kwargs):
         tk.Frame.__init__(self, master, **kwargs)
@@ -204,28 +218,14 @@ class PageOne(tk.Frame):
 
         notebook = ttk.Notebook(self)
         self.tab_schedule = Schedule(notebook)
-        tab_live_game = ttk.Frame(notebook)
+        tab_live_game = LiveGame(notebook)
         tab_team_stats = ttk.Frame(notebook)
         tab_standings = ttk.Frame(notebook)
         notebook.add(self.tab_schedule, text='Schedule')
         notebook.add(tab_live_game, text='Live Game')
         notebook.add(tab_team_stats, text='Team Stats')
         notebook.add(tab_standings, text='Standings')
-        notebook.grid(row=1,column=1, sticky='ns')
-
-        #********Live Game*********
-        lbl_home = tk.Label(tab_live_game, text="AWAY")
-        lbl_home.grid(row=1,column=2)
-
-        lbl_away = tk.Label(tab_live_game, text="HOME")
-        lbl_away.grid(row=1,column=4)
-
-        lbl_game_id = tk.Label(tab_live_game, textvariable=self.Game_ID)
-        lbl_game_id.grid(row=1,column=6)
-
-        #********Team Stats*********
-
-        #********Standings*********
+        notebook.grid(row=1,column=1)
 
     def tkraise(self):
         '''called when this frame is opened'''
@@ -233,39 +233,41 @@ class PageOne(tk.Frame):
         self.after(10, self.tab_schedule.update, self.master.frames[StartPage].Team_Name.get())
 
 def get_data():
-    with open('nhl_data.json') as f:
-        data = json.load(f)
+    api_url = 'http://live.nhle.com/GameData/RegularSeasonScoreboardv3.jsonp?loadScoreboard=jQuery110105207217424176633_1428694268811&_=1428694268812'
+    api_headers = {'Host': 'live.nhle.com', 'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36', 'Referer': 'http://www.nhl.com/ice/scores.htm'}
 
-    #~ api_url = 'http://live.nhle.com/GameData/RegularSeasonScoreboardv3.jsonp?loadScoreboard=jQuery110105207217424176633_1428694268811&_=1428694268812'
-    #~ api_headers = {'Host': 'live.nhle.com', 'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36', 'Referer': 'http://www.nhl.com/ice/scores.htm'}
-#~
-    #~ try:
-        #~ r = requests.get(api_url, headers=api_headers) #making sure there is a connection with the API
-    #~ except (requests.ConnectionError): #Catch these errors
-        #~ return "Could not get response from NHL.com trying again..."
-    #~ except(requests.HTTPError):
-        #~ return "HTTP Error when loading url. Please restart program. "
-    #~ except(requests.Timeout):
-        #~ return "The request took too long to process and timed out. Trying again... "
-    #~ except(socket.error):
-        #~ return "Could not get response from NHL.com trying again..."
-    #~ except(requests.RequestException):
-        #~ return "Unknown error. Please restart the program. "
-    #~ # We get back JSON data with some JS around it, gotta remove the JS
-    #~ json_data = r.text
-#~
-    #~ # Remove the leading JS
-    #~ json_data = json_data.replace('loadScoreboard(', '')
-#~
-    #~ # Remove the trailing ')'
-    #~ json_data  = json_data[:-1]
-#~
-    #~ data = json.loads(json_data)
+    try:
+        r = requests.get(api_url, headers=api_headers) #making sure there is a connection with the API
+    except (requests.ConnectionError): #Catch these errors
+        return "Could not get response from NHL.com trying again..."
+    except(requests.HTTPError):
+        return "HTTP Error when loading url. Please restart program. "
+    except(requests.Timeout):
+        return "The request took too long to process and timed out. Trying again... "
+    except(socket.error):
+        return "Could not get response from NHL.com trying again..."
+    except(requests.RequestException):
+        return "Unknown error. Please restart the program. "
+    # We get back JSON data with some JS around it, gotta remove the JS
+    json_data = r.text
+
+    # Remove the leading JS
+    json_data = json_data.replace('loadScoreboard(', '')
+
+    # Remove the trailing ')'
+    json_data  = json_data[:-1]
+
+    data = json.loads(json_data)
 
     if 'games' not in data:
         return "ERROR: no games found"
 
     return data
+
+def get_data():
+    '''debug'''
+    with open('nhl_data.json') as f:
+        return json.load(f)
 
 def main():
     root = tk.Tk()
