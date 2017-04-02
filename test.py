@@ -34,7 +34,7 @@ TEAMS = [
     ("Carolina", "Hurricanes", "Carolina_Hurricanes.gif"),
     ("Chicago", "Blackhawks", "Chicago_Blackhawks.gif"),
     ("Colorado", "Avalanche", "Colorado_Avalanche.gif"),
-    ("Columbus", "Blue Jackets", "Columbus_Blue_Jackets.gif"),
+    ("Columbus", "Bluejackets", "Columbus_Blue_Jackets.gif"),
     ("Dallas", "Stars", "Dallas_Stars.gif"),
     ("Detroit", "Red Wings", "Detroit_Red_Wings.gif"),
     ("Edmonton", "Oilers", "Edmonton_Oilers.gif"),
@@ -59,7 +59,7 @@ TEAMS = [
     ("Winnipeg", "Jets", "Winnipeg_Jets.gif"),
 ]
 
-COLUMNS = 7
+COLUMNS = 5
 
 class GameTime(tk.Frame):
     def __init__(self, master=None, **kwargs):
@@ -137,7 +137,7 @@ class Schedule(ttk.Frame):
         vsb.configure(command=self.tree.yview)
         self.tree.configure(yscrollcommand=vsb.set)
 
-        self.tree.tag_configure('fav', background="blue")
+        self.tree.tag_configure('fav', background="light grey")
 
         col_headers = ("Away", "", "Home", "", "Clock", "Status")
         col_widths = (100, 20, 100, 20, 150, 100)
@@ -201,6 +201,174 @@ class LiveGame(tk.Frame):
         lbl_game_id = tk.Label(self, textvariable=master.master.Game_ID)
         lbl_game_id.grid(row=1,column=6)
 
+        self.lbl_game = tk.Label(self)
+        self.lbl_game.grid(row=25,column=4)
+
+    def update_url(self, game_id):
+
+        if game_id == "Unassigned":
+            self.lbl_game.config(text="There is no live game!", font=(None, 30, 'bold'))
+        else:
+            url = 'http://statsapi.web.nhl.com/api/v1/game/{}/feed/live'.format(game_id)
+            j = requests.get(url).json()            
+            self.lbl_game.config(text=url)
+
+            #Away team name heading
+            lbl_away_name = tk.Label(self, text=j['gameData']['teams']['away']['name'],font="-weight bold")
+            lbl_away_name.grid(row=3,column=2)
+            lbl_away_name.config(text=j['gameData']['teams']['away']['name'])
+            #Away team score heading
+            lbl_away_score = tk.Label(self, text=j['liveData']['boxscore']['teams']['away']['teamStats']['teamSkaterStats']['goals'],font="-weight bold")
+            lbl_away_score.grid(row=3,column=3)
+            lbl_away_score.config(text=j['liveData']['boxscore']['teams']['away']['teamStats']['teamSkaterStats']['goals'])
+            #Home team name heading
+            lbl_home_name = tk.Label(self, text=j['gameData']['teams']['home']['name'],font="-weight bold")
+            lbl_home_name.grid(row=3,column=4)
+            lbl_home_name.config(text=j['gameData']['teams']['home']['name'])
+            #Home team score heading
+            lbl_home_score = tk.Label(self, text=j['liveData']['boxscore']['teams']['home']['teamStats']['teamSkaterStats']['goals'],font="-weight bold")
+            lbl_home_score.grid(row=3,column=5)
+            lbl_home_score.config(text=j['liveData']['boxscore']['teams']['home']['teamStats']['teamSkaterStats']['goals'])            
+            x = 4
+            #Displays away team stats about current game
+            for awayteam,value in j['liveData']['boxscore']['teams']['away']['teamStats']['teamSkaterStats'].items():
+                lbl_away_data_col = tk.Label(self, text=awayteam)
+                lbl_away_data_col.grid(row=x,column=2)
+                lbl_away_data_col.config(text=awayteam)
+                lbl_away_data_val = tk.Label(self, text=value)
+                lbl_away_data_val.grid(row=x,column=3)
+                lbl_away_data_val.config(text=value)
+                x = x + 1
+
+            x = 4
+            #Displays home team stats about the current game
+            for hometeam,value in j['liveData']['boxscore']['teams']['home']['teamStats']['teamSkaterStats'].items():
+                lbl_home_data_col = tk.Label(self, text=hometeam)
+                lbl_home_data_col.grid(row=x,column=4)
+                lbl_home_data_col.config(text=hometeam)
+                lbl_home_data_value = tk.Label(self, text=value)
+                lbl_home_data_value.grid(row=x,column=5)
+                lbl_home_data_value.config(text=value)
+                x = x + 1
+
+            #Just adds two blank rows between the game stats and the current play
+            spacer = tk.Label(self, text="            ")
+            spacer.grid(row=18,column=2)
+            spacer = tk.Label(self, text="            ")
+            spacer.grid(row=19,column=2)
+
+            #Static label
+            lbl_play_description = tk.Label(self, text="Current Play: ",font=(None, 12))
+            lbl_play_description.grid(row=20,column=2)
+            #Text description of the current play
+            lbl_current_play = tk.Label(self, text=j['liveData']['plays']['currentPlay']['result']['description'],font=(None, 12), anchor='w')
+            lbl_current_play.grid(row=20,column=3)
+            lbl_current_play.config(text=j['liveData']['plays']['currentPlay']['result']['description'])
+            
+class Player_Stats(tk.Frame):
+    def __init__(self, master=None, **kwargs):
+        tk.Frame.__init__(self, master, **kwargs)
+
+        lbl_home = tk.Label(self, text="Players")
+        lbl_home.grid(row=1,column=2)
+
+        lbl_away = tk.Label(self, text="Stats")
+        lbl_away.grid(row=1,column=4)
+
+        lbl_game_id = tk.Label(self, textvariable=master.master.Game_ID)
+        lbl_game_id.grid(row=1,column=6)
+
+        self.lbl_game = tk.Label(self)
+        self.lbl_game.grid(row=2,column=4)
+
+
+class Standings(tk.Frame):
+    def __init__(self, master=None, **kwargs):
+        tk.Frame.__init__(self, master, **kwargs)
+
+        lbl_home = tk.Label(self, text="Metropolitan",font="-weight bold")
+        lbl_home.grid(row=1,column=2)
+
+        #Just adds empty space horizontally between Metropolitan and Atlantic 
+        lbl_spacer = tk.Label(self, text="                      ")
+        lbl_spacer.grid(row=1,column=3)
+        
+        lbl_away = tk.Label(self, text="Atlantic",font="-weight bold")
+        lbl_away.grid(row=1,column=5)
+
+        lbl_home = tk.Label(self, text="Central",font="-weight bold")
+        lbl_home.grid(row=10,column=2)
+
+        lbl_away = tk.Label(self, text="Pacific",font="-weight bold")
+        lbl_away.grid(row=10,column=5)
+        
+    def make_standings(self):
+        #Full standings JSON URL 
+        url = "https://statsapi.web.nhl.com/api/v1/standings?expand=standings.record,standings.team,standings.division,standings.conference,team.schedule.next,team.schedule.previous&season=20162017"
+        j = requests.get(url).json()
+        #X is the index number of the position with in the division
+        x = 0
+        #Row number where to place the data on the page
+        row = 2
+        #The position seed in the division
+        place = 1
+        #Metropolitan division
+        for record in j['records'][0]['teamRecords']:
+            #Seeding number in division
+            lbl_position = tk.Label(self,text=str(place) + ': ')
+            lbl_position.grid(row=row,column=1)
+            #Team name
+            team_lbl = tk.Label(self, text=j['records'][0]['teamRecords'][x]['team']['name'])
+            team_lbl.grid(row=row,column=2)
+            team_lbl.config(text=j['records'][0]['teamRecords'][x]['team']['name'])
+            #Increase the index to the next team
+            x = x + 1
+            #Increase the seed number
+            place = place + 1
+            #Increase the row
+            row = row + 1
+        #Initilize
+        x = 0
+        row = 2
+        place = 1
+        #Atlantic division
+        for record in j['records'][1]['teamRecords']:
+            lbl_position = tk.Label(self,text=str(place) + ': ')
+            lbl_position.grid(row=row,column=4)
+            team_lbl = tk.Label(self, text=j['records'][1]['teamRecords'][x]['team']['name'])
+            team_lbl.grid(row=row,column=5)
+            team_lbl.config(text=j['records'][1]['teamRecords'][x]['team']['name'])
+            x = x + 1
+            place = place + 1
+            row = row + 1
+        x = 0
+        row = 11
+        place = 1
+        #Central division
+        for record in j['records'][2]['teamRecords']:
+            lbl_position = tk.Label(self,text=str(place) + ': ')
+            lbl_position.grid(row=row,column=1)
+            team_lbl = tk.Label(self, text=j['records'][2]['teamRecords'][x]['team']['name'])
+            team_lbl.grid(row=row,column=2)
+            team_lbl.config(text=j['records'][2]['teamRecords'][x]['team']['name'])
+            x = x + 1
+            place = place + 1
+            row = row + 1
+        x = 0
+        row = 11
+        place = 1
+        #Pacific division
+        for record in j['records'][3]['teamRecords']:
+            lbl_position = tk.Label(self,text=str(place) + ': ')
+            lbl_position.grid(row=row,column=4)
+            team_lbl = tk.Label(self, text=j['records'][3]['teamRecords'][x]['team']['name'])
+            team_lbl.grid(row=row,column=5)
+            team_lbl.config(text=j['records'][3]['teamRecords'][x]['team']['name'])
+            x = x + 1
+            place = place + 1
+            row = row + 1
+            
+            
 class PageOne(tk.Frame):
     def __init__(self, master=None, **kwargs):
         tk.Frame.__init__(self, master, **kwargs)
@@ -212,20 +380,29 @@ class PageOne(tk.Frame):
         button1.grid(row=2,column=1)
 
         notebook = ttk.Notebook(self)
+        notebook.bind("<<NotebookTabChanged>>", self.tab_change)
         self.tab_schedule = Schedule(notebook)
-        tab_live_game = LiveGame(notebook)
-        tab_team_stats = ttk.Frame(notebook)
-        tab_standings = ttk.Frame(notebook)
+        self.tab_live_game = LiveGame(notebook)
+        self.tab_team_stats = Player_Stats(notebook)
+        self.tab_standings = Standings(notebook)
         notebook.add(self.tab_schedule, text='Schedule')
-        notebook.add(tab_live_game, text='Live Game')
-        notebook.add(tab_team_stats, text='Team Stats')
-        notebook.add(tab_standings, text='Standings')
+        notebook.add(self.tab_live_game, text='Live Game')
+        notebook.add(self.tab_team_stats, text='Player Stats')
+        notebook.add(self.tab_standings, text='Standings')
         notebook.grid(row=1,column=1)
+
+    def tab_change(self, event=None):
+        tab = event.widget.tab(event.widget.index("current"))['text']
+        if tab == 'Live Game':
+            self.tab_live_game.update_url(self.Game_ID.get())
+        if tab == 'Standings':
+            self.tab_standings.make_standings()
 
     def tkraise(self):
         '''called when this frame is opened'''
         tk.Frame.tkraise(self)
-        self.after(10, self.tab_schedule.update, self.master.frames[StartPage].Team_Name.get())
+        self.update()
+        self.tab_schedule.update(self.master.frames[StartPage].Team_Name.get())
 
 def get_data():
     api_url = 'http://live.nhle.com/GameData/RegularSeasonScoreboardv3.jsonp?loadScoreboard=jQuery110105207217424176633_1428694268811&_=1428694268812'
@@ -264,6 +441,8 @@ def get_data():
     #~ with open('nhl_data.json') as f:
         #~ return json.load(f)
 
+
+
 def main():
     root = tk.Tk()
     app = GameTime(root)
@@ -277,4 +456,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
