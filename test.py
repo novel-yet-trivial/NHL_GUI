@@ -275,20 +275,38 @@ class LiveGame(tk.Frame):
     
             
 class Player_Stats(tk.Frame):
-    def __init__(self, master=None, **kwargs):
-        tk.Frame.__init__(self, master, **kwargs)
+    def __init__(self, master=None, highlight='', **kwargs):
+        ttk.Frame.__init__(self, master, **kwargs)
 
-        lbl_home = tk.Label(self, text="Players")
-        lbl_home.grid(row=1,column=2)
+        self.error_lbl = tk.Label(self, fg="red")
+        self.error_lbl.place(relx=.5, rely=.5)
 
-        lbl_away = tk.Label(self, text="Stats")
-        lbl_away.grid(row=1,column=4)
+        self.tree = ttk.Treeview(self)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        lbl_game_id = tk.Label(self, textvariable=master.master.Game_ID)
-        lbl_game_id.grid(row=1,column=6)
+        #Verticle Scroll
+        vsb = ttk.Scrollbar(self)
+        vsb.pack(side=tk.RIGHT, fill=tk.Y, expand=True)
+        vsb.configure(command=self.tree.yview)
 
-        self.lbl_game = tk.Label(self)
-        self.lbl_game.grid(row=2,column=4)
+        #Horizontal Scroll
+        hsb = ttk.Scrollbar(self)
+        hsb.pack(side=tk.BOTTOM, fill=tk.X, expand=True)
+        hsb.configure(command=self.tree.xview)
+
+        self.tree.configure(yscrollcommand=hsb.set)
+        self.tree.configure(xscrollcommand=hsb.set)
+
+        col_headers = ("Time on Ice", "", "Assists", "", "Goals", "", "Shots", "", "Hits", "", "Power Play Goals","", "Power Play Assits", "", "Penalty Minutes", "", "Faceoff %", "", "Faceoff Wins", "", "Faceoffs Taken", "", "Takeaways", "", "Giveaways", "", "Short Handed Goals", "", "Short Handed Assists", "", "Shots Blocked", "", "+/-", "", "Even Time on Ice", "", "Powerplay Time on Ice", "", " Short Handed Time on Ice")
+        col_widths = (20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20)
+
+        columns = list(map(str, range(len(col_headers))))
+        self.tree.config(columns=columns)
+        self.tree.column('#0',width=0, minwidth=0)
+        for col, name, width in zip(columns, col_headers, col_widths):
+            self.tree.heading(col, text=name)
+            self.tree.column(col,width=width, minwidth=20)
+
 
 
 class Standings(tk.Frame):
