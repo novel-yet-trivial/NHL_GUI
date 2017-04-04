@@ -192,17 +192,32 @@ class LiveGame(tk.Frame):
     def __init__(self, master=None, **kwargs):
         tk.Frame.__init__(self, master, **kwargs)
 
-        lbl_home = tk.Label(self, text="AWAY")
-        lbl_home.grid(row=1,column=2)
+        self.lbl_home = tk.Label(self, text="AWAY")
+        self.lbl_home.grid(row=1,column=2)
 
-        lbl_away = tk.Label(self, text="HOME")
-        lbl_away.grid(row=1,column=4)
+        self.lbl_away = tk.Label(self, text="HOME")
+        self.lbl_away.grid(row=1,column=4)
 
-        lbl_game_id = tk.Label(self, textvariable=master.master.Game_ID)
-        lbl_game_id.grid(row=1,column=6)
+        self.lbl_game_id = tk.Label(self, textvariable=master.master.Game_ID)
+        self.lbl_game_id.grid(row=1,column=6)
 
         self.lbl_game = tk.Label(self)
         self.lbl_game.grid(row=25,column=4)
+
+        self.lbl_away_name = tk.Label(self, text="", font="-weight bold")
+        self.lbl_away_name.grid(row=3,column=2)
+
+        self.lbl_away_score = tk.Label(self, text="")
+        self.lbl_away_score.grid(row=3,column=3)
+
+        self.lbl_home_name = tk.Label(self, text="", font="-weight bold")
+        self.lbl_home_name.grid(row=3,column=4)
+
+        self.lbl_home_score = tk.Label(self, text="")
+        self.lbl_home_score.grid(row=3,column=5)
+
+        self.lbl_current_play = tk.Label(self, text="",font=(None, 12), anchor='w')
+        self.lbl_current_play.grid(row=20,column=3)
 
     def update_url(self, game_id):
 
@@ -214,41 +229,33 @@ class LiveGame(tk.Frame):
             self.lbl_game.config(text=url)
 
             #Away team name heading
-            lbl_away_name = tk.Label(self, text=j['gameData']['teams']['away']['name'],font="-weight bold")
-            lbl_away_name.grid(row=3,column=2)
-            lbl_away_name.config(text=j['gameData']['teams']['away']['name'])
+            self.lbl_away_name.config(text=j['gameData']['teams']['away']['name'])
             #Away team score heading
-            lbl_away_score = tk.Label(self, text=j['liveData']['boxscore']['teams']['away']['teamStats']['teamSkaterStats']['goals'],font="-weight bold")
-            lbl_away_score.grid(row=3,column=3)
-            lbl_away_score.config(text=j['liveData']['boxscore']['teams']['away']['teamStats']['teamSkaterStats']['goals'])
+            self.lbl_away_score.config(text=j['liveData']['boxscore']['teams']['away']['teamStats']['teamSkaterStats']['goals'])
             #Home team name heading
-            lbl_home_name = tk.Label(self, text=j['gameData']['teams']['home']['name'],font="-weight bold")
-            lbl_home_name.grid(row=3,column=4)
-            lbl_home_name.config(text=j['gameData']['teams']['home']['name'])
+            self.lbl_home_name.config(text=j['gameData']['teams']['home']['name'])
             #Home team score heading
-            lbl_home_score = tk.Label(self, text=j['liveData']['boxscore']['teams']['home']['teamStats']['teamSkaterStats']['goals'],font="-weight bold")
-            lbl_home_score.grid(row=3,column=5)
-            lbl_home_score.config(text=j['liveData']['boxscore']['teams']['home']['teamStats']['teamSkaterStats']['goals'])            
+            self.lbl_home_score.config(text=j['liveData']['boxscore']['teams']['home']['teamStats']['teamSkaterStats']['goals'])            
             x = 4
             #Displays away team stats about current game
             for awayteam,value in j['liveData']['boxscore']['teams']['away']['teamStats']['teamSkaterStats'].items():
-                lbl_away_data_col = tk.Label(self, text=awayteam)
-                lbl_away_data_col.grid(row=x,column=2)
-                lbl_away_data_col.config(text=awayteam)
-                lbl_away_data_val = tk.Label(self, text=value)
-                lbl_away_data_val.grid(row=x,column=3)
-                lbl_away_data_val.config(text=value)
+                self.lbl_away_data_col = tk.Label(self, text=awayteam)
+                self.lbl_away_data_col.grid(row=x,column=2)
+                self.lbl_away_data_col.config(text=awayteam)
+                self.lbl_away_data_val = tk.Label(self, text=value)
+                self.lbl_away_data_val.grid(row=x,column=3)
+                self.lbl_away_data_val.config(text=value)
                 x = x + 1
 
             x = 4
             #Displays home team stats about the current game
             for hometeam,value in j['liveData']['boxscore']['teams']['home']['teamStats']['teamSkaterStats'].items():
-                lbl_home_data_col = tk.Label(self, text=hometeam)
-                lbl_home_data_col.grid(row=x,column=4)
-                lbl_home_data_col.config(text=hometeam)
-                lbl_home_data_value = tk.Label(self, text=value)
-                lbl_home_data_value.grid(row=x,column=5)
-                lbl_home_data_value.config(text=value)
+                self.lbl_home_data_col = tk.Label(self, text=hometeam)
+                self.lbl_home_data_col.grid(row=x,column=4)
+                self.lbl_home_data_col.config(text=hometeam)
+                self.lbl_home_data_value = tk.Label(self, text=value)
+                self.lbl_home_data_value.grid(row=x,column=5)
+                self.lbl_home_data_value.config(text=value)
                 x = x + 1
 
             #Just adds two blank rows between the game stats and the current play
@@ -261,9 +268,11 @@ class LiveGame(tk.Frame):
             lbl_play_description = tk.Label(self, text="Current Play: ",font=(None, 12))
             lbl_play_description.grid(row=20,column=2)
             #Text description of the current play
-            lbl_current_play = tk.Label(self, text=j['liveData']['plays']['currentPlay']['result']['description'],font=(None, 12), anchor='w')
-            lbl_current_play.grid(row=20,column=3)
-            lbl_current_play.config(text=j['liveData']['plays']['currentPlay']['result']['description'])
+            try:
+                self.lbl_current_play.config(text=j['liveData']['plays']['currentPlay']['result']['description'])
+            except:
+                self.lbl_current_play.config(text="No current play.")
+    
             
 class Player_Stats(tk.Frame):
     def __init__(self, master=None, **kwargs):
