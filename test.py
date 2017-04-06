@@ -225,7 +225,7 @@ class LiveGame(tk.Frame):
             self.lbl_game.config(text="There is no live game!", font=(None, 30, 'bold'))
         else:
             url = 'http://statsapi.web.nhl.com/api/v1/game/{}/feed/live'.format(game_id)
-            j = requests.get(url).json()            
+            j = requests.get(url).json()
             self.lbl_game.config(text=url)
 
             #Away team name heading
@@ -235,7 +235,7 @@ class LiveGame(tk.Frame):
             #Home team name heading
             self.lbl_home_name.config(text=j['gameData']['teams']['home']['name'])
             #Home team score heading
-            self.lbl_home_score.config(text=j['liveData']['boxscore']['teams']['home']['teamStats']['teamSkaterStats']['goals'])            
+            self.lbl_home_score.config(text=j['liveData']['boxscore']['teams']['home']['teamStats']['teamSkaterStats']['goals'])
             x = 4
             #Displays away team stats about current game
             for awayteam,value in j['liveData']['boxscore']['teams']['away']['teamStats']['teamSkaterStats'].items():
@@ -272,41 +272,168 @@ class LiveGame(tk.Frame):
                 self.lbl_current_play.config(text=j['liveData']['plays']['currentPlay']['result']['description'])
             except:
                 self.lbl_current_play.config(text="No current play.")
-    
-            
-class Player_Stats(tk.Frame):
+
+
+class Player_Stats(ttk.Frame):
     def __init__(self, master=None, highlight='', **kwargs):
-        ttk.Frame.__init__(self, master, **kwargs)
+        ttk.Frame.__init__(self, master, width=500, height=500, **kwargs)
+        self.grid_propagate(False)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
         self.error_lbl = tk.Label(self, fg="red")
         self.error_lbl.place(relx=.5, rely=.5)
 
         self.tree = ttk.Treeview(self)
-        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.tree.grid(row=0, column=0, sticky='nsew')
 
-        #Verticle Scroll
+        #Vertical Scroll
         vsb = ttk.Scrollbar(self)
-        vsb.pack(side=tk.RIGHT, fill=tk.Y, expand=True)
+        vsb.grid(row=0, column=1, sticky='ns')
         vsb.configure(command=self.tree.yview)
 
         #Horizontal Scroll
-        hsb = ttk.Scrollbar(self)
-        hsb.pack(side=tk.BOTTOM, fill=tk.X, expand=True)
+        hsb = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
+        hsb.grid(row=1, column=0, sticky='ew')
         hsb.configure(command=self.tree.xview)
 
-        self.tree.configure(yscrollcommand=hsb.set)
+        self.tree.configure(yscrollcommand=vsb.set)
         self.tree.configure(xscrollcommand=hsb.set)
 
-        col_headers = ("Time on Ice", "", "Assists", "", "Goals", "", "Shots", "", "Hits", "", "Power Play Goals","", "Power Play Assits", "", "Penalty Minutes", "", "Faceoff %", "", "Faceoff Wins", "", "Faceoffs Taken", "", "Takeaways", "", "Giveaways", "", "Short Handed Goals", "", "Short Handed Assists", "", "Shots Blocked", "", "+/-", "", "Even Time on Ice", "", "Powerplay Time on Ice", "", " Short Handed Time on Ice")
-        col_widths = (20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20)
+        #Column header titles
+        col_headers = ("Player", "Time on Ice",  "Assists",  "Goals", "Shots",  "Hits",  "Power Play Goals", "Power Play Assits",  "Penalty Minutes", "Faceoff Wins",  "Faceoffs Taken",  "Takeaways",  "Giveaways",  "Short Handed Goals",  "Short Handed Assists",  "Shots Blocked",  "+/-",  "Even Time on Ice",  "Powerplay Time on Ice",  "Short Handed Time on Ice")
 
         columns = list(map(str, range(len(col_headers))))
         self.tree.config(columns=columns)
         self.tree.column('#0',width=0, minwidth=0)
-        for col, name, width in zip(columns, col_headers, col_widths):
-            self.tree.heading(col, text=name)
-            self.tree.column(col,width=width, minwidth=20)
 
+        '''this method adjusts all the columns to the same width'''
+        #~ for col, name in zip(columns, col_headers):
+            #~ self.tree.heading(col, text=name)
+            #~ self.tree.column(col, width=150, minwidth=20)
+
+        '''this method uses a list of widths to make each column a unique width'''
+        col_widths = [120, 90, 60, 50, 50, 40, 140, 150, 135, 110, 120, 90, 90, 140, 160, 110, 30, 140, 180, 200]
+        for col, name, width in zip(self.tree['columns'], col_headers, col_widths):
+            self.tree.heading(col, text=name)
+            self.tree.column(col, width=width, minwidth=20)
+
+    def update_player_stats(self,game_id, highlight=''):
+
+        #Clear out the stats from the old tree
+        self.tree.delete(*self.tree.get_children())
+        self.tree.tkraise()
+        
+        url = 'http://statsapi.web.nhl.com/api/v1/game/{}/feed/live'.format(game_id)
+        j = requests.get(url).json()
+        away_team = j['gameData']['teams']['away']['name']
+        #Show away team name in first row
+        self.tree.insert('', 'end',values = (away_team , " ",  " ",  " ", " ",  " ",  " ", " ",  " ", " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " "))
+        #Get and display player stats
+        for awayplayer in j['liveData']['boxscore']['teams']['away']['players']:
+            try:
+                away_player_name = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['person']['fullName']
+                away_timeOnIce = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['timeOnIce']
+                away_assists = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['assists']
+                away_goals = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['goals']
+                away_shots = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['shots']
+                away_hits = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['hits']
+                away_powerPlayGoals = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['powerPlayGoals']
+                away_powerPlayAssists = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['powerPlayAssists']
+                away_penaltyMinutes = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['penaltyMinutes']
+                away_faceOffWins = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['faceOffWins']
+                away_faceoffTaken = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['faceoffTaken']
+                away_takeaways = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['takeaways']
+                away_giveaways = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['giveaways']
+                away_shortHandedGoals = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['shortHandedGoals']
+                away_shortHandedAssists = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['shortHandedAssists']
+                away_blocked = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['blocked']
+                away_plusMinus = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['plusMinus']
+                away_evenTimeOnIce = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['evenTimeOnIce']
+                away_powerPlayTimeOnIce = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['powerPlayTimeOnIce']
+                away_shortHandedTimeOnIce = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['shortHandedTimeOnIce']     
+            #If player didn't play OR play is a goalie... Need to work on a goalie stat page
+            except:
+                away_timeOnIce = "DNP"
+                away_assists ="DNP"
+                away_goals = "DNP"
+                away_shots = "DNP"
+                away_hits = "DNP"
+                away_powerPlayGoals ="DNP"
+                away_powerPlayAssists ="DNP"
+                away_penaltyMinutes = "DNP"
+                away_faceOffWins ="DNP"
+                away_faceoffTaken = "DNP"
+                away_takeaways = "DNP"
+                away_giveaways = "DNP"
+                away_shortHandedGoals = "DNP"
+                away_shortHandedAssists ="DNP"
+                away_blocked = "DNP"
+                away_plusMinus = "DNP"
+                away_evenTimeOnIce = "DNP"
+                away_powerPlayTimeOnIce = "DNP"
+                away_shortHandedTimeOnIce = "DNP"
+            #Put all the stats in a variable
+            row = away_player_name, away_timeOnIce, away_assists, away_goals, away_shots, away_hits, away_powerPlayGoals, away_powerPlayAssists, away_penaltyMinutes, away_faceOffWins, away_faceoffTaken, away_takeaways, away_giveaways, away_shortHandedGoals, away_shortHandedAssists, away_blocked, away_plusMinus, away_evenTimeOnIce, away_powerPlayTimeOnIce, away_shortHandedTimeOnIce    
+            #Insert the values into the tree
+            self.tree.insert('', 'end',values = row)
+
+        #Create some spacing to distinguish a new teams stats
+        self.tree.insert('', 'end',values = (" " , " ",  " ",  " ", " ",  " ",  " ", " ",  " ", " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " "))
+        self.tree.insert('', 'end',values = ("*******************", "**************",  "**************",  "**************", "**************",  "**************",  "**************", "**************",  "**************", "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************"))
+        self.tree.insert('', 'end',values = ("*******************", "**************",  "**************",  "**************", "**************",  "**************",  "**************", "**************",  "**************", "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************"))
+        self.tree.insert('', 'end',values = ("*******************", "**************",  "**************",  "**************", "**************",  "**************",  "**************", "**************",  "**************", "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************",  "**************"))
+        self.tree.insert('', 'end',values = (" " , " ",  " ",  " ", " ",  " ",  " ", " ",  " ", " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " "))
+        home_team = j['gameData']['teams']['home']['name']
+        #Show home team name
+        self.tree.insert('', 'end',values = (home_team , " ",  " ",  " ", " ",  " ",  " ", " ",  " ", " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " ",  " "))
+        #Display home player stats
+        for homeplayer in j['liveData']['boxscore']['teams']['home']['players']:
+            try:
+                home_player_name = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['person']['fullName']
+                home_timeOnIce = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['timeOnIce']
+                home_assists = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['assists']
+                home_goals = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['goals']
+                home_shots = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['shots']
+                home_hits = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['hits']
+                home_powerPlayGoals = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['powerPlayGoals']
+                home_powerPlayAssists = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['powerPlayAssists']
+                home_penaltyMinutes = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['penaltyMinutes']
+                home_faceOffWins = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['faceOffWins']
+                home_faceoffTaken = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['faceoffTaken']
+                home_takeaways = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['takeaways']
+                home_giveaways = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['giveaways']
+                home_shortHandedGoals = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['shortHandedGoals']
+                home_shortHandedAssists = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['shortHandedAssists']
+                home_blocked = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['blocked']
+                home_plusMinus = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['plusMinus']
+                home_evenTimeOnIce = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['evenTimeOnIce']
+                home_powerPlayTimeOnIce = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['powerPlayTimeOnIce']
+                home_shortHandedTimeOnIce = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['shortHandedTimeOnIce']     
+            #If player didn't play OR play is a goalie... Need to work on a goalie stat page
+            except:
+                home_timeOnIce = "DNP"
+                home_assists ="DNP"
+                home_goals = "DNP"
+                home_shots = "DNP"
+                home_hits = "DNP"
+                home_powerPlayGoals ="DNP"
+                home_powerPlayAssists ="DNP"
+                home_penaltyMinutes = "DNP"
+                home_faceOffWins ="DNP"
+                home_faceoffTaken = "DNP"
+                home_takeaways = "DNP"
+                home_giveaways = "DNP"
+                home_shortHandedGoals = "DNP"
+                home_shortHandedAssists ="DNP"
+                home_blocked = "DNP"
+                home_plusMinus = "DNP"
+                home_evenTimeOnIce = "DNP"
+                home_powerPlayTimeOnIce = "DNP"
+                home_shortHandedTimeOnIce = "DNP"
+            #Put all the stats in a variable
+            row = home_player_name, home_timeOnIce, home_assists , home_goals, home_shots, home_hits, home_powerPlayGoals, home_powerPlayAssists, home_penaltyMinutes, home_faceOffWins, home_faceoffTaken, home_takeaways, home_giveaways, home_shortHandedGoals, home_shortHandedAssists, home_blocked, home_plusMinus, home_evenTimeOnIce, home_powerPlayTimeOnIce, home_shortHandedTimeOnIce
+            self.tree.insert('', 'end',values = row)
 
 
 class Standings(tk.Frame):
@@ -316,10 +443,10 @@ class Standings(tk.Frame):
         lbl_home = tk.Label(self, text="Metropolitan",font="-weight bold")
         lbl_home.grid(row=1,column=2)
 
-        #Just adds empty space horizontally between Metropolitan and Atlantic 
+        #Just adds empty space horizontally between Metropolitan and Atlantic
         lbl_spacer = tk.Label(self, text="                      ")
         lbl_spacer.grid(row=1,column=3)
-        
+
         lbl_away = tk.Label(self, text="Atlantic",font="-weight bold")
         lbl_away.grid(row=1,column=5)
 
@@ -328,9 +455,9 @@ class Standings(tk.Frame):
 
         lbl_away = tk.Label(self, text="Pacific",font="-weight bold")
         lbl_away.grid(row=10,column=5)
-        
+
     def make_standings(self):
-        #Full standings JSON URL 
+        #Full standings JSON URL
         url = "https://statsapi.web.nhl.com/api/v1/standings?expand=standings.record,standings.team,standings.division,standings.conference,team.schedule.next,team.schedule.previous&season=20162017"
         j = requests.get(url).json()
         #X is the index number of the position with in the division
@@ -394,8 +521,8 @@ class Standings(tk.Frame):
             x = x + 1
             place = place + 1
             row = row + 1
-            
-            
+
+
 class PageOne(tk.Frame):
     def __init__(self, master=None, **kwargs):
         tk.Frame.__init__(self, master, **kwargs)
@@ -424,6 +551,8 @@ class PageOne(tk.Frame):
             self.tab_live_game.update_url(self.Game_ID.get())
         if tab == 'Standings':
             self.tab_standings.make_standings()
+        if tab == 'Player Stats':
+            self.tab_team_stats.update_player_stats(self.Game_ID.get())
 
     def tkraise(self):
         '''called when this frame is opened'''
@@ -468,8 +597,6 @@ def get_data():
     #~ with open('nhl_data.json') as f:
         #~ return json.load(f)
 
-
-
 def main():
     root = tk.Tk()
     app = GameTime(root)
@@ -480,6 +607,12 @@ def main():
         print("icon load failed") # fails in some conditions
     root.resizable(0,0)
     root.mainloop()
+
+#~ def main():
+    #~ root = tk.Tk()
+    #~ app = Player_Stats(root)
+    #~ app.pack(fill=tk.BOTH, expand=True)
+    #~ root.mainloop()
 
 if __name__ == "__main__":
     main()
