@@ -272,7 +272,7 @@ class LiveGame(tk.Frame):
                 self.lbl_current_play.config(text=j['liveData']['plays']['currentPlay']['result']['description'])
             except:
                 self.lbl_current_play.config(text="No current play.")
-            #self.after(500, update_url)
+            self.after(30000 , self.update_url)
 
 
 class Player_Stats(ttk.Frame):
@@ -607,7 +607,7 @@ def main():
     except tk.TclError:
         print("icon load failed") # fails in some conditions
     root.resizable(0,0)
-    #root.after(0, LiveGame.update_url(LiveGame, LiveGame.Game_ID))
+    root.after(0, LiveGame.update_url(LiveGame, LiveGame.Game_ID))
     root.mainloop()
 
 #~ def main():
