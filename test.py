@@ -219,8 +219,12 @@ class LiveGame(tk.Frame):
         self.lbl_current_play = tk.Label(self, text="",font=(None, 12), anchor='w')
         self.lbl_current_play.grid(row=20,column=3)
 
-    def update_url(self, game_id):
+    def autoupdate_url(self):
+        self.update_url()
+        self.after(30000 , self.autoupdate_url)
 
+    def update_url(self):
+        game_id = self.master.master.Game_ID.get()
         if game_id == "Unassigned":
             self.lbl_game.config(text="There is no live game!", font=(None, 30, 'bold'))
         else:
@@ -272,7 +276,6 @@ class LiveGame(tk.Frame):
                 self.lbl_current_play.config(text=j['liveData']['plays']['currentPlay']['result']['description'])
             except:
                 self.lbl_current_play.config(text="No current play.")
-            self.after(30000 , self.update_url)
 
 
 class Player_Stats(ttk.Frame):
@@ -324,7 +327,7 @@ class Player_Stats(ttk.Frame):
         #Clear out the stats from the old tree
         self.tree.delete(*self.tree.get_children())
         self.tree.tkraise()
-        
+
         url = 'http://statsapi.web.nhl.com/api/v1/game/{}/feed/live'.format(game_id)
         j = requests.get(url).json()
         away_team = j['gameData']['teams']['away']['name']
@@ -352,7 +355,7 @@ class Player_Stats(ttk.Frame):
                 away_plusMinus = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['plusMinus']
                 away_evenTimeOnIce = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['evenTimeOnIce']
                 away_powerPlayTimeOnIce = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['powerPlayTimeOnIce']
-                away_shortHandedTimeOnIce = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['shortHandedTimeOnIce']     
+                away_shortHandedTimeOnIce = j['liveData']['boxscore']['teams']['away']['players'][awayplayer]['stats']['skaterStats']['shortHandedTimeOnIce']
             #If player didn't play OR play is a goalie... Need to work on a goalie stat page
             except:
                 away_timeOnIce = "DNP"
@@ -375,7 +378,7 @@ class Player_Stats(ttk.Frame):
                 away_powerPlayTimeOnIce = "DNP"
                 away_shortHandedTimeOnIce = "DNP"
             #Put all the stats in a variable
-            row = away_player_name, away_timeOnIce, away_assists, away_goals, away_shots, away_hits, away_powerPlayGoals, away_powerPlayAssists, away_penaltyMinutes, away_faceOffWins, away_faceoffTaken, away_takeaways, away_giveaways, away_shortHandedGoals, away_shortHandedAssists, away_blocked, away_plusMinus, away_evenTimeOnIce, away_powerPlayTimeOnIce, away_shortHandedTimeOnIce    
+            row = away_player_name, away_timeOnIce, away_assists, away_goals, away_shots, away_hits, away_powerPlayGoals, away_powerPlayAssists, away_penaltyMinutes, away_faceOffWins, away_faceoffTaken, away_takeaways, away_giveaways, away_shortHandedGoals, away_shortHandedAssists, away_blocked, away_plusMinus, away_evenTimeOnIce, away_powerPlayTimeOnIce, away_shortHandedTimeOnIce
             #Insert the values into the tree
             self.tree.insert('', 'end',values = row)
 
@@ -410,7 +413,7 @@ class Player_Stats(ttk.Frame):
                 home_plusMinus = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['plusMinus']
                 home_evenTimeOnIce = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['evenTimeOnIce']
                 home_powerPlayTimeOnIce = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['powerPlayTimeOnIce']
-                home_shortHandedTimeOnIce = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['shortHandedTimeOnIce']     
+                home_shortHandedTimeOnIce = j['liveData']['boxscore']['teams']['home']['players'][homeplayer]['stats']['skaterStats']['shortHandedTimeOnIce']
             #If player didn't play OR play is a goalie... Need to work on a goalie stat page
             except:
                 home_timeOnIce = "DNP"
@@ -549,7 +552,7 @@ class PageOne(tk.Frame):
     def tab_change(self, event=None):
         tab = event.widget.tab(event.widget.index("current"))['text']
         if tab == 'Live Game':
-            self.tab_live_game.update_url(self.Game_ID.get())
+            self.tab_live_game.update_url()
         if tab == 'Standings':
             self.tab_standings.make_standings()
         if tab == 'Player Stats':
@@ -607,7 +610,7 @@ def main():
     except tk.TclError:
         print("icon load failed") # fails in some conditions
     root.resizable(0,0)
-    root.after(0, LiveGame.update_url(LiveGame, LiveGame.Game_ID))
+    app.frames[PageOne].tab_live_game.autoupdate_url()
     root.mainloop()
 
 #~ def main():
